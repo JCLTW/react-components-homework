@@ -5,6 +5,7 @@ import ChatBox from './ChatBox/ChatBox';
 import ChatInput from './ChatInput/ChatInput';
 import shopData from '../data/shop.json';
 import answersData from '../data/answers.json';
+import { ROLE } from '../constants';
 
 class Chat extends Component {
   constructor(props, context) {
@@ -27,13 +28,28 @@ class Chat extends Component {
     }, 1000);
   }
 
+  getAutoReplyMessage = (message) => {
+    return answersData.find((answer) => answer.tags.indexOf(message) > -1);
+  };
+
+  handleSendMessages = (message) => {
+    let { messages } = this.state;
+    const messageDto = { text: message, role: ROLE.CUSTOMER };
+    messages = messages.concat(messageDto);
+
+    const replyMessageDto = this.getAutoReplyMessage(message);
+    if (replyMessageDto) messages = messages.concat(replyMessageDto);
+
+    this.setState({ messages });
+  };
+
   render() {
     const { shop, messages } = this.state;
     return (
       <main className="Chat">
         <ChatHeader shop={shop} />
         <ChatBox messages={messages} />
-        <ChatInput />
+        <ChatInput onSendMessages={this.handleSendMessages} />
       </main>
     );
   }
